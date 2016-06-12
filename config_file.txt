@@ -1,0 +1,35 @@
+### Basic packages
+[packages]
+'''
+Indicate the packages that you want to install.
+example: packages = terminator gparted vim
+you can create a list of variable for example:
+     packages = terminator gparted vim
+     gitpackages = git git-gui
+     etcpackages = anypackage etcpackage
+'''
+packages = terminator gparted vim
+## Git packages
+gitpackages = git git-gui
+## Python packages
+pypackages = python3-dev ninja-ide
+
+### PPA's Repositories and Packages
+[ppas]
+'''
+Indicate the PPAS packages that you want to install.
+example: ppa1 = ppa:damien-moore/codeblocks-stable
+         packages1 = codeblocks codeblocks-contrib
+you can create a list of ppas with th packages for example:
+    ##  Codeblocks C++
+    ppa1 = ppa:damien-moore/codeblocks-stable
+    packages1 = codeblocks codeblocks-contrib gcc g++ devhelp cppreference-doc-en-html
+    ### Veracrypt
+    ppa2 = ppa:unit193/encryption
+    packages2 = veracrypt     packages = terminator gparted vim
+It is important keep the formart "ppa(number) and packages(number) and the
+number has to be incremental"
+'''
+### Veracrypt
+ppa1 = ppa:unit193/encryption
+packages1 = veracrypt
