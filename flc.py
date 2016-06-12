@@ -1,13 +1,10 @@
 #!/usr/bin/python3.5
 # -*- coding: utf-8 -*-
-
-
 import os
 import sys
 import subprocess
 import re
 import socket
-#import urllib
 import shutil
 import stat
 import ipaddress
@@ -15,7 +12,6 @@ import platform
 import configparser
 
 NECESSARY_PACKAGES = ('whois', 'python3-launchpadlib')
-
 
 lock_file = '/var/run/script_install.lock'
 
@@ -61,7 +57,6 @@ class config_file():
         count_sec = len(section)
         if count_sec % 2 == 0:
             x = int(len(section) / 2)
-        #if not x <= 1:
             try:
                 for i in range(x):
                     v = i + 1
@@ -145,9 +140,9 @@ def ip_validator(_ip, subnet=False):
             else:
                 return True, 'IPV6'
     except ValueError:
-        return False # one of the 'parts' not convertible to integer
+        return False  # one of the 'parts' not convertible to integer
     except (AttributeError, TypeError):
-        return False # `ip` isn't even a string
+        return False  # `ip` isn't even a string
 
 
 def port_validator(_port):
@@ -166,7 +161,7 @@ class Linux_Cmd():
     def __init__(self, _packages=None):
         self._packages = _packages
         self.view_output = VIEW_OUTPUT  # lint:ok
-        self.Ubuntu = Ubuntu
+        self.Ubuntu = Ubuntu  # lint:ok
         if self.Ubuntu:  # lint:ok
             _sudo = 'sudo'
         else:
@@ -212,10 +207,10 @@ class Linux_Cmd():
         _ppas = _tuple_ppa[0]
         _packages = _tuple_ppa[1]
         for _ppa in _ppas:
-            print('Validating PPA: %s' % (_ppa))
+            print(('Validating PPA: %s' % (_ppa)))
             if self.ppa_info(_ppa):
                 if not self.check_repository(_ppa):
-                    print('Adding PPA repository %s' % (_ppa))
+                    print(('Adding PPA repository %s' % (_ppa)))
                     self.command('add-apt-repository -y %s' % (_ppa))
                     self.update_cmd()
             if count == len(_ppas):
@@ -225,11 +220,11 @@ class Linux_Cmd():
 
     def install_cmd(self, _package):
         if not self.check_pgk(_package):
-            print('Installing %s' % (_package))
+            print(('Installing %s' % (_package)))
             self.command('apt install -y %s' % (_package))
             print('OK...\n')
         else:
-            print('%s is already install' % (_package))
+            print(('%s is already install' % (_package)))
 
     def multi_install_cmd(self, _packages):
         if type(_packages) is list or type(_packages) is tuple:
@@ -246,24 +241,24 @@ class Linux_Cmd():
         try:
             lp = Launchpad.login_anonymously('foo', 'production', None)
         except  httplib2.HttpLib2Error as e:
-            print('Error connection to launchpad.net:', e)
+            print(('Error connection to launchpad.net:', e))
             sys.exit(1)
         ppa_name = _ppa
         m = re.search(r'^(ppa:)?(?P<user>[^/]+)/(?P<name>.+)', ppa_name)
         if m:
             _user, name = m.group('user', 'name')
         else:
-            print('Unvalid PPA name:', _ppa)
+            print(('Unvalid PPA name:', _ppa))
             sys.exit(1)
         try:
             owner = lp.people[_user]
             ppa = owner.getPPAByName(name=name)
-            print('PPA is Valid. Source URL:\n%s' % (ppa))
+            print(('PPA is Valid. Source URL:\n%s' % (ppa)))
             return True
         except lazr.restfulclient.errors.RestfulError as e:
-            print('Error getting PPA info:', e)
+            print(('Error getting PPA info:', e))
             return False
-            exit(1)
+            sys.exit(1)
 
     def check_repository(self, _repository):
         check = False
@@ -330,9 +325,9 @@ class iptables():
                    ]
     global IPTABLES_BOTTOM
     IPTABLES_BOTTOM = [
-                   '## Cerramos todos los puertos de INPUT que no permitimos anteriormente',
-                   'iptables -A INPUT -p tcp --dport 1:1024 -j DROP &> /dev/null',
-                   'iptables -A INPUT -p udp --dport 1:1024 -j DROP &> /dev/null',
+    '## Cerramos todos los puertos de INPUT que no permitimos anteriormente',
+    'iptables -A INPUT -p tcp --dport 1:1024 -j DROP &> /dev/null',
+    'iptables -A INPUT -p udp --dport 1:1024 -j DROP &> /dev/null',
                   ]
 
     del_file(tmp_iptables)
@@ -666,13 +661,6 @@ if __name__ == '__main__':
                 if not lock_process(lock_file):
                     if is_connected():
                         if check_OS_Version():
-                            #config_file = sys.argv[1]
-                            #import config_file
-                            #global Ubuntu
-                            #Ubuntu = True
-                            #print(len(sys.argv))
-                            #print(INSTALL_ALL)
-                            #print(VIEW_OUTPUT)
                             install()
         else:
             help_app('Else Error: Invalid option(s).')
