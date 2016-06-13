@@ -11,9 +11,9 @@ Download fcl.py and config_file.txt
    $ sudo flc.py config_file [options]
 ```
 * Options:
-   - -y        Answer "yes" to all questions
-   - -v        View standart output
-   - --help    Display the help
+   - **-y**        Answer "yes" to all questions
+   - **-v**        View standart output
+   - **--help**    Display the help
 * Examples:
 ```sh
     $ sudo flc.py config_file -v
@@ -36,9 +36,9 @@ Descarga fcl.py y config_file.txt
    $ sudo flc.py config_file [options]
 ```
 * Opciones:
-   - -y        Responde si a todas las opciones
-   - -v        Permite ver la salida estandar
-   - --help    Para mostar la ayuda
+   - **-y**        Responde si a todas las opciones
+   - **-v**        Permite ver la salida estandar
+   - **--help**    Para mostar la ayuda
 * Examples:
 ```sh
     $ sudo flc.py config_file -v
