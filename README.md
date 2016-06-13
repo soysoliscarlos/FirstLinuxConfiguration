@@ -6,6 +6,22 @@ Since I started in the world of linux (over ten years), I've always had problems
 
 ## Installation
 Download fcl.py and config_file.txt
+# Tutorial
+* Usage:
+    ** sudo flc.py config_file [options]
+
+* Options:
+    -y        Answer "yes" to all questions
+    -v        View standart output
+    --help    Display this message
+
+* Examples:
+    sudo flc.py config_file -v
+    sudo flc.py config_file -y
+    sudo flc.py config_file -v -y
+    sudo flc.py config_file -y -v
+    sudo flc.py --help
+    flc.py --help
 
 
 #Español
@@ -17,3 +33,19 @@ Desde que empecé en el mundo de linux (hace más de diez años), siempre he ten
 
 ## Instalación
 Descarga fcl.py y config_file.txt
+# Tutorial
+Usage:
+    sudo flc.py config_file [options]
+
+Options:
+    -y        Answer "yes" to all questions
+    -v        View standart output
+    --help    Display this message
+
+Examples:
+    sudo flc.py config_file -v
+    sudo flc.py config_file -y
+    sudo flc.py config_file -v -y
+    sudo flc.py config_file -y -v
+    sudo flc.py --help
+    flc.py --help
