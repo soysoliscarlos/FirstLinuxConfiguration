@@ -22,7 +22,7 @@ def check_root():
         return True  # Return if user is root
     else:
         print("I cannot run as a mortal... Sorry...")
-        print('Run: sudo %s \n' % (sys.argv[0]))
+        print(('Run: sudo %s \n' % (sys.argv[0])))
         sys.exit(1)  # Return if user is not root
 
 
@@ -68,6 +68,10 @@ class config_file():
             except:
                 pass
         return ppas, packages
+
+    def iptables_asn(self, _section):
+        section = self.read_section(_section)
+        return section
 
 
 def is_connected():
@@ -287,7 +291,6 @@ class Linux_Cmd():
 class iptables():
     tmp_iptables = '/tmp/iptables.sh'
     final_iptables = '/etc/init.d/iptables.sh'
-    global IPTABLES_HEAD
     IPTABLES_HEAD = ['#!/bin/bash',
                  '### BEGIN INIT INFO',
                  '# Provides: firewall',
@@ -306,34 +309,45 @@ class iptables():
                  'iptables -X',
                  'iptables -Z',
                  'iptables -t nat -F',
+                 'ip6tables -F',
+                 'ip6tables -X',
+                 'ip6tables -Z',
+                 'ip6tables -t nat -F',
                  '',
                  '## Condiciones por defecto',
                  'iptables -P INPUT DROP',
+                 'ip6tables -P INPUT DROP',
                  '',
                  '## Desde el localhost se puede hacer todo',
                  'iptables -A INPUT -i lo -j ACCEPT',
+                 'ip6tables -A INPUT -i lo -j ACCEPT',
                  '',
-                 '## Permitir ping',
-                 'iptables -A INPUT -i eth0 -p ICMP -j ACCEPT',
-                 'iptables -A OUTPUT -o eth0 -p ICMP -j ACCEPT',
-                 '',
+                 #'## Permitir ping',
+                 #'iptables -A INPUT -i eth0 -p ICMP -j ACCEPT',
+                 #'iptables -A OUTPUT -o eth0 -p ICMP -j ACCEPT',
+                 #'',
                 ]
-    global IPTABLES_MIDDLE
     IPTABLES_MIDDLE = ['## Permitir conexiones establecidas',
                    'iptables -A INPUT -m state --state ESTABLISHED -j ACCEPT',
+                   'ip6tables -A INPUT -m state --state ESTABLISHED -j ACCEPT',
                    '',
                    ]
-    global IPTABLES_BOTTOM
     IPTABLES_BOTTOM = [
     '## Cerramos todos los puertos de INPUT que no permitimos anteriormente',
     'iptables -A INPUT -p tcp --dport 1:1024 -j DROP &> /dev/null',
     'iptables -A INPUT -p udp --dport 1:1024 -j DROP &> /dev/null',
+    'ip6tables -A INPUT -p tcp --dport 1:1024 -j DROP &> /dev/null',
+    'ip6tables -A INPUT -p udp --dport 1:1024 -j DROP &> /dev/null',
                   ]
 
     del_file(tmp_iptables)
 
-    def __init__(self):
-        super(iptables, self).__init__()
+    def __init__(self, IPTABLES_HEAD=IPTABLES_HEAD,
+                       IPTABLES_MIDDLE=IPTABLES_MIDDLE,
+                       IPTABLES_BOTTOM=IPTABLES_BOTTOM):
+        self.IPTABLES_HEAD = IPTABLES_HEAD
+        self.IPTABLES_MIDDLE = IPTABLES_MIDDLE
+        self.IPTABLES_BOTTOM = IPTABLES_BOTTOM
 
     def allow_service(self):
         service = True
@@ -364,26 +378,24 @@ class iptables():
                 print('\nYou did not write a valid port number.')
                 print('Please write down a valid port number.')
 
-    def block_asn(self):
+    def block_asn(self, _asn):
         asn_list = []
         asn_ips = []
         asn_file = '/tmp/asn.txt'
         del_file(asn_file)
         cmd = Linux_Cmd()
-        for key in list(IPTABLES_ASN.keys()):
+        for key in list(_asn.keys()):
             print(('\nBlocking %s ASN' % (key)))
             with open(self.tmp_iptables, "a") as fw:
                 fw.write('\n## Blocking %s ASN\n' % (key))
-            #print(asn_file)
             cmd.command('whois -H -h riswhois.ripe.net -- -F -K -i %s'
-            % (IPTABLES_ASN[key]),
+            % (_asn[key]),
                         True, asn_file)
             with open(asn_file, "r") as asn_read:
                 for line in asn_read:
                     asn_list.append(line)
             for asn_item in asn_list:
                 if not re.findall('^%', asn_item):
-                    #value = re.findall('\\t+\S+\\t', asn_item)
                     value = re.findall("\\t(.+)\\t", asn_item)
                     for v in value:
                         asn_ips.append(v)
@@ -392,31 +404,29 @@ class iptables():
                 with open(self.tmp_iptables, "a") as fw:
                     if ip_validator(IP, True) == (True, 'IPV4'):
                         fw.write('iptables -A INPUT -s %s -j DROP &> /dev/null \n' % (IP))
-                    elif ip_validator(IP, True) == (True, 'IPV4'):
+                    elif ip_validator(IP, True) == (True, 'IPV6'):
                         fw.write('ip6tables -A INPUT -s %s -j DROP &> /dev/null \n' % (IP))
 
-    def create_iptables(self):
+    def create_iptables(self, _asn):
         print("Creating iptables rules...\n")
         with open(self.tmp_iptables, "a") as fw:
-            for ih in IPTABLES_HEAD:
+            for ih in self.IPTABLES_HEAD:
                 fw.write('%s \n' % (ih))
 
         Q = 'Do you want open some port?'
         if question(Q):
             self.allow_service()
 
-        with open(self.tmp_iptables, "a") as fw:
-            for ih in IPTABLES_MIDDLE:
-                fw.write('%s \n' % (ih))
-
         Q = 'Do you want block the ASNs'
         if question(Q):
-            self.block_asn()
+            self.block_asn(_asn)
 
         with open(self.tmp_iptables, "a") as fw:
-            for ih in IPTABLES_BOTTOM:
+            for ih in self.IPTABLES_MIDDLE:
                 fw.write('%s \n' % (ih))
-            for ib in IPTABLES_BOTTOM:
+
+        with open(self.tmp_iptables, "a") as fw:
+            for ib in self.IPTABLES_BOTTOM:
                 fw.write('%s \n' % (ib))
 
         del_file(self.final_iptables)
@@ -466,11 +476,11 @@ def install_gits(_git_pkg, _dest):
             ppa.git_clone(_git, _dest)
 
 
-def firewall():
+def firewall(_asn):
     Q = 'Do you want create iptables?'
     if question(Q):
         fw = iptables()
-        fw.create_iptables()
+        fw.create_iptables(_asn)
 
 
 def install_app():
@@ -548,17 +558,19 @@ def install():
     conf = config_file(sys.argv[1])
     PACKAGES = conf.joint_list_packages('packages')
     PPAS = conf.ppas_and_pkg('ppas')
+    IPTABLES_ASN = conf.iptables_asn('iptables_asn')
+    print(IPTABLES_ASN)
     if INSTALL_ALL:  # lint:ok
-        yall.update_cmd()
-        yall.upgrade_cmd()
-        yall.multi_install_cmd(NECESSARY_PACKAGES)
-        if len(PACKAGES) > 0:
-            yall.multi_install_cmd(PACKAGES)
-        if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
-            yall.install_and_add_ppa(PPAS)
-        #fw = iptables()
-        #fw.create_iptables()
-
+        #yall.update_cmd()
+        #yall.upgrade_cmd()
+        #yall.multi_install_cmd(NECESSARY_PACKAGES)
+        #if len(PACKAGES) > 0:
+            #yall.multi_install_cmd(PACKAGES)
+        #if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
+            #yall.install_and_add_ppa(PPAS)
+        fw = iptables()
+        fw.create_iptables(IPTABLES_ASN)
+        pass
     else:
         update_system()
         yall.multi_install_cmd(NECESSARY_PACKAGES)
@@ -566,7 +578,7 @@ def install():
             install_list_package(PACKAGES)
         if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
             install_ppa(PPAS)
-        #firewall()
+        firewall(IPTABLES_ASN)
         #install_gits(GIT_PKG, DEST_GIT)
 
     #install_app()
