@@ -39,7 +39,7 @@ Descarga fcl.py y config_file.txt
    - **-y**        Responde si a todas las opciones
    - **-v**        Permite ver la salida estandar
    - **--help**    Para mostar la ayuda
-* Examples:
+* Ejemplos:
 ```sh
     $ sudo flc.py config_file -v
     $ sudo flc.py config_file -y
