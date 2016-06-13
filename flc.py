@@ -10,10 +10,25 @@ import stat
 import ipaddress
 import platform
 import configparser
+import urllib.request
 
 NECESSARY_PACKAGES = ('whois', 'python3-launchpadlib')
 
 lock_file = '/var/run/script_install.lock'
+
+specials_repositories = {
+    'Google-Chrome': {
+        'apt_key': ["wget -O /tmp/linux_signing_key.pub 'https://dl-ssl.google.com/linux/linux_signing_key.pub'",
+                    "apt-key add /tmp/linux_signing_key.pub"],
+        'source_list': '/etc/apt/sources.list.d/google-chrome.list',
+        'deb_line': 'deb http://dl.google.com/linux/chrome/deb/ stable main',
+        'packages': 'google-chrome-stable'},
+    #'Dropbox': {
+        #'apt_key': 'apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E',
+        #'source_list': '/etc/apt/sources.list.d/dropbox.list',
+        #'deb_line': 'deb http://linux.dropbox.com/ubuntu/ xenial main',
+        #'packages': 'dropbox'},
+    }
 
 
 def check_root():
@@ -173,9 +188,24 @@ class Linux_Cmd():
         self._sudo = _sudo
 
     def command(self, _cmd, redirect_stdout=False, out_file=None):
+        _get = False
+        if re.findall("^wget.+", _cmd):
+            _get = True
         _cmd = _cmd.split()
         _cmd.insert(0, self._sudo)
-        if redirect_stdout:
+        if _get:
+            if _cmd.index('-O'):
+                out_file = _cmd[3]
+                url = _cmd[4]
+                url = re.findall("\'(.+)\'", url)
+                urllib.request.urlretrieve(url[0],
+                    filename=out_file)
+            else:
+                url = _cmd[3]
+                url = re.findall("\'(.+)\'", url)
+                urllib.request.urlretrieve(url[0],
+                    filename=url[0])
+        elif redirect_stdout:
             of = open(out_file, "w")
             subprocess.check_call(_cmd, stdout=of)
         elif self.view_output:
@@ -444,6 +474,34 @@ class iptables():
         fw.command('bash %s' % (self.final_iptables))
 
 
+class install_specials_repositories():
+
+    def __init__(self, _specials_repositories, q=False):
+        self._specials_repositories = _specials_repositories
+        self.q = q
+
+    def install_oneapp(self, tuple_package):
+        _q = True
+        if self.q:
+            if not question('Do you want install %s?' % (tuple_package[0])):
+                _q = False
+        if _q:
+            app = Linux_Cmd()
+            sr = tuple_package[1]
+            if not app.check_pgk(sr['packages']):
+                if not os.path.isfile(sr['source_list']):
+                    with open(sr['source_list'], "a") as applist:
+                        applist.write(sr['deb_line'])
+                for i in sr['apt_key']:
+                    app.command(i)
+                app.update_cmd()
+                app.multi_install_cmd(sr['packages'])
+
+    def installApps(self):
+        for k in self._specials_repositories.items():
+            self.install_oneapp(k)
+
+
 def update_system():
     Q = 'Do you want update/upgrade the system?'
     if question(Q):
@@ -481,28 +539,6 @@ def firewall(_asn):
     if question(Q):
         fw = iptables()
         fw.create_iptables(_asn)
-
-
-def install_app():
-    app = Linux_Cmd()
-
-    def install_myapp():
-        if not app.check_pgk(ADD_REPOSITORIES[k]['packages']):
-            if not os.path.isfile(ADD_REPOSITORIES[k]['source_list']):
-                with open(ADD_REPOSITORIES[k]['source_list'], "a") as applist:
-                    applist.write(ADD_REPOSITORIES[k]['deb_line'])
-            app.update_cmd()
-            app.command(ADD_REPOSITORIES[k]['apt_key'])
-            app.multi_install_cmd(ADD_REPOSITORIES[k]['packages'])
-
-    if not INSTALL_ALL:  # lint:ok
-        for k in ADD_REPOSITORIES:
-            if question(ADD_REPOSITORIES[k]['Q']):
-                install_myapp()
-    else:
-        for k in ADD_REPOSITORIES:
-            install_myapp()
-    return True
 
 
 def secure_delete():
@@ -559,18 +595,19 @@ def install():
     PACKAGES = conf.joint_list_packages('packages')
     PPAS = conf.ppas_and_pkg('ppas')
     IPTABLES_ASN = conf.iptables_asn('iptables_asn')
-    print(IPTABLES_ASN)
     if INSTALL_ALL:  # lint:ok
-        #yall.update_cmd()
-        #yall.upgrade_cmd()
-        #yall.multi_install_cmd(NECESSARY_PACKAGES)
-        #if len(PACKAGES) > 0:
-            #yall.multi_install_cmd(PACKAGES)
-        #if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
-            #yall.install_and_add_ppa(PPAS)
+        yall.update_cmd()
+        yall.upgrade_cmd()
+        yall.multi_install_cmd(NECESSARY_PACKAGES)
+        if len(PACKAGES) > 0:
+            yall.multi_install_cmd(PACKAGES)
+        if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
+            yall.install_and_add_ppa(PPAS)
         fw = iptables()
         fw.create_iptables(IPTABLES_ASN)
-        pass
+        sr = install_specials_repositories(specials_repositories)
+        sr.installApps()
+
     else:
         update_system()
         yall.multi_install_cmd(NECESSARY_PACKAGES)
@@ -580,6 +617,8 @@ def install():
             install_ppa(PPAS)
         firewall(IPTABLES_ASN)
         #install_gits(GIT_PKG, DEST_GIT)
+        sr = install_specials_repositories(specials_repositories, True)
+        sr.installApps()
 
     #install_app()
     yall.autoremove_cmd()
@@ -667,7 +706,6 @@ def check_OS_Version():
 
 if __name__ == '__main__':
     try:
-
         if options():
             if check_root():
                 if not lock_process(lock_file):
