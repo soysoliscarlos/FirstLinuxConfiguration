@@ -1,3 +1,9 @@
+[general]
+lock_file = /var/run/flc.lock
+MyOS = Ubuntu
+OSVersion = 16.04
+OSName = Xenial
+
 ### Basic packages
 [packages]
 # Indicate the packages that you want to install.
@@ -6,14 +12,13 @@
 #     packages = terminator gparted vim
 #     gitpackages = git git-gui
 #     etcpackages = anypackage etcpackage
-
 packages = terminator gparted vim
 ## Git packages
 gitpackages = git git-gui
 ## Python packages
 pypackages = python3-dev ninja-ide
 
-### PPA's Repositories and Packages
+#### PPA's Repositories and Packages
 [ppas]
 # Indicate the PPAS packages that you want to install.
 # example: ppa1 = ppa:damien-moore/codeblocks-stable
