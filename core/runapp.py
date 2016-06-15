@@ -13,7 +13,12 @@ import sys
 from .general import question
 from .linux_cmd import Linux_Cmd
 
+default_config_file = 'config/default_flc.conf'
+
+
 NECESSARY_PACKAGES = ('whois', 'python3-launchpadlib')
+
+
 
 specials_repositories = {
     'Google-Chrome': {
@@ -148,28 +153,36 @@ def help_app(_message=False):
     sys.exit(1)
 
 
-def install(config, install_all, stdout, lock_file, MyOS, OSVersion, OSName):
+def install(default_config, config, install_all, stdout,
+            lock_file, MyOS, OSVersion, OSName):
     yall = Linux_Cmd(MyOS, stdout)
     PACKAGES = config.joint_list_packages('packages')
     PPAS = config.ppas_and_pkg('ppas')
+    default_dict_vars = default_config.read_section('general')
+    default_packages = default_dict_vars['default_packages']
+    default_ubuntu = default_dict_vars['default_ubuntu']
     #IPTABLES_ASN = config.iptables_asn('iptables_asn')
     if install_all:
         yall.update_cmd()
         yall.upgrade_cmd()
-        yall.multi_install_cmd(NECESSARY_PACKAGES)
+        yall.multi_install_cmd(default_packages)
         if len(PACKAGES) > 0:
             yall.multi_install_cmd(PACKAGES)
-        if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
-            yall.install_and_add_ppa(PPAS)
+        if MyOS == 'ubuntu':
+            yall.multi_install_cmd(default_ubuntu)
+            if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
+                yall.install_and_add_ppa(PPAS)
         #fw = iptables()
         #fw.create_iptables(IPTABLES_ASN)
     else:
         update_system(MyOS, stdout, lock_file)
-        yall.multi_install_cmd(NECESSARY_PACKAGES)
+        yall.multi_install_cmd(default_packages)
         if len(PACKAGES) > 0:
             install_list_package(PACKAGES, lock_file)
-        if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
-            install_ppa(PPAS, lock_file)
+        if MyOS == 'ubuntu':
+            yall.multi_install_cmd(default_ubuntu)
+            if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
+                install_ppa(PPAS, lock_file)
         #firewall(IPTABLES_ASN)
         ##install_gits(GIT_PKG, DEST_GIT)
 
@@ -182,7 +195,7 @@ def install(config, install_all, stdout, lock_file, MyOS, OSVersion, OSName):
 def options():
     stdout = False
     install_all = False
-    config_file = False
+    config_file = default_config_file
     ARGS = len(sys.argv)
     #print(ARGS)
     parameters = ['-y', '-v']
@@ -219,11 +232,10 @@ def options():
                     help_app('Option "%s" is repeated.' % (lArg[0]))
         return (True, install_all, stdout)
 
-    # Validando presentación de los argumentos
+    # Validing fields
     if ARGS > 4:
         help_app('Too many option \n')
     elif ARGS == 1:
-        config_file = 'config/default_flc.conf'
         return {'value': True, 'stdout': stdout,
                 'install_all': install_all, 'config_file': config_file}
     elif ARGS == 2:  # Only way to read the help

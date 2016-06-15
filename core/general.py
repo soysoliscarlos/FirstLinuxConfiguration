@@ -5,6 +5,7 @@ import socket
 import ipaddress
 import configparser
 import psutil
+#from .runapp import default_config_file
 
 
 def check_root():
@@ -39,7 +40,7 @@ class config_file():
         try:
             lock_file = dict_vars['lock_file']
         except KeyError:
-            lock_file = '/var/run/flc.lock'
+            lock_file = False
         try:
             MyOS = dict_vars['myos']
         except KeyError:
