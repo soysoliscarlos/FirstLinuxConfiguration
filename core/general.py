@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-#import subprocess
-#import re
 import socket
-#import shutil
-#import stat
 import ipaddress
-#import platform
 import configparser
-#import urllib.request
 import psutil
 
 
@@ -35,10 +29,8 @@ class config_file():
 
     def read_section(self, _section):
         try:
-            #print('no empty')
             section = dict(self._config.items(_section))
         except configparser.NoSectionError:
-            #print('empty')
             section = {}
         return section
 
@@ -148,7 +140,6 @@ def lock_process(_lock_file):
         with open(_lock_file, "a") as lf:
             lf.write(str(os.getpid()) + '\n')
             return False
-
 
 
 def question(_Q, lock_file):

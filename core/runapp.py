@@ -149,9 +149,7 @@ def help_app(_message=False):
 
 
 def install(config, install_all, stdout, lock_file, MyOS, OSVersion, OSName):
-    #print(config, install_all, stdout, MyOS, OSVersion, OSName)
     yall = Linux_Cmd(MyOS, stdout)
-    #conf = config_file(sys.argv[1])
     PACKAGES = config.joint_list_packages('packages')
     PPAS = config.ppas_and_pkg('ppas')
     #IPTABLES_ASN = config.iptables_asn('iptables_asn')
@@ -184,75 +182,69 @@ def install(config, install_all, stdout, lock_file, MyOS, OSVersion, OSName):
 def options():
     stdout = False
     install_all = False
-    arg1 = None
-    arg2 = None
+    config_file = False
     ARGS = len(sys.argv)
     #print(ARGS)
     parameters = ['-y', '-v']
+
+    def validing_parameters(parameters, isfile=False):
+        stdout = False
+        install_all = False
+        args = len(sys.argv)
+        lArg = []
+        if isfile:
+            args -= 2
+        else:
+            args -= 1
+            if args > 2:
+                help_app('Too many option \n')
+        for _p in range(0, args):
+        # Validating the n parameter
+            lArg.append(None)
+            for p in parameters:
+                value = _p
+                if isfile:
+                    value = _p + 1
+                if sys.argv[value + 1] == p:
+                    lArg[_p] = p
+                    if p == '-y':
+                        install_all = True
+                    elif p == '-v':
+                        stdout = True
+                    break
+            if lArg[_p] is None:
+                help_app('"%s" is not a valid option.' % (sys.argv[value + 1]))
+            if len(lArg) > 1:
+                if len(lArg) != len(set(lArg)):
+                    help_app('Option "%s" is repeated.' % (lArg[0]))
+        return (True, install_all, stdout)
+
     # Validando presentación de los argumentos
     if ARGS > 4:
         help_app('Too many option \n')
     elif ARGS == 1:
-        help_app('You did not indicate de configuration file \n')
+        config_file = 'config/default_flc.conf'
+        return {'value': True, 'stdout': stdout,
+                'install_all': install_all, 'config_file': config_file}
     elif ARGS == 2:  # Only way to read the help
         if sys.argv[1] == '--help':
             help_app()
         elif not os.path.isfile(sys.argv[1]):
-            help_app('Error: %s is not a file' % (sys.argv[1]))
+            if not validing_parameters(parameters):
+                pass
         elif os.path.isfile(sys.argv[1]):
-            return {'value': True, 'stdout': stdout, 'install_all': install_all}
+            return {'value': True, 'stdout': stdout,
+                    'install_all': install_all, 'config_file': sys.argv[1]}
     elif ARGS >= 3:
-        # Validating the first parameter
-        for p in parameters:
-            #print(p)
-            if sys.argv[2] == p:
-                print((sys.argv[2]))
-                arg1 = p
-                #a1 = True
-                break
-            #else:
-                #a1 = False
-        #print(a1, arg1)
-        if arg1 is None:
-            print(("arg1 %s" % (arg1)))
-            help_app('"%s" is not a valid option.' % (sys.argv[2]))
-        #print(a1, arg1)
-        # Validating the second parameter
-        try:
-            for p in parameters:
-                if sys.argv[3] == p:
-                    arg2 = p
-                    break
-                #else:
-                    #a2 = False
-            if arg2 is None:
-                help_app('"%s" is not a valid option.' % (sys.argv[3]))
-            elif sys.argv[3] == arg1:
-                help_app('Option "%s" is repeated.' % (arg1))
-        except IndexError:
-            #a2 = True
-            pass
-
-    # Loading parameters
-    if sys.argv[2] == '-y':
-        install_all = True
-    else:
-        try:
-            if sys.argv[3] == '-y':
-                install_all = True
-        except IndexError:
-            pass
-    if sys.argv[2] == '-v':
-        stdout = True
-    else:
-        try:
-            if sys.argv[3] == '-v':
-                stdout = True
-        except IndexError:
-            pass
-
+        if os.path.isfile(sys.argv[1]):
+            config_file = sys.argv[1]
+            vp = validing_parameters(parameters, True)
+        elif not os.path.isfile(sys.argv[1]):
+            vp = validing_parameters(parameters)
+        install_all = vp[1]
+        stdout = vp[2]
     return {'value': True, 'stdout': stdout,
-            'install_all': install_all}
+            'install_all': install_all, 'config_file': config_file}
 
 
 
