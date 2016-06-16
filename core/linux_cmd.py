@@ -169,7 +169,7 @@ class Linux_Cmd():
         check = False
         _source_list = os.listdir('/etc/apt/sources.list.d/')
         repo = re.findall('/+\S+', _repository)
-        print(repo)
+        #print(repo)
 
         if repo:
             repo = repo[0].lstrip('/')
