@@ -1,4 +1,4 @@
-##!/usr/bin/python3.5
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import core
 
@@ -9,7 +9,6 @@ if __name__ == '__main__':
         config_file = dict_options['config_file']
         default_config = core.config_file(core.default_config_file)
         default_dict_vars = default_config.read_config_vars('general')
-        #necessary_packages = default_dict_vars['necessary_packages']
         value = dict_options['value']
         install_all = dict_options['install_all']
         stdout = dict_options['stdout']
