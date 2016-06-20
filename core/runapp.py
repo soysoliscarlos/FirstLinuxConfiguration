@@ -16,54 +16,60 @@ from .linux_cmd import Linux_Cmd
 default_config_file = 'config/default_flc.conf'
 
 
-NECESSARY_PACKAGES = ('whois', 'python3-launchpadlib')
+#NECESSARY_PACKAGES = ('whois', 'python3-launchpadlib')
 
 
 
-specials_repositories = {
-    'Google-Chrome': {
-        'apt_key': ["wget -O /tmp/linux_signing_key.pub 'https://dl-ssl.google.com/linux/linux_signing_key.pub'",
-                    "apt-key add /tmp/linux_signing_key.pub"],
-        'source_list': '/etc/apt/sources.list.d/google-chrome.list',
-        'deb_line': 'deb http://dl.google.com/linux/chrome/deb/ stable main',
-        'packages': 'google-chrome-stable'},
-    'Dropbox': {
-        'apt_key': 'apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E',
-        'source_list': '/etc/apt/sources.list.d/dropbox.list',
-        'deb_line': 'deb http://linux.dropbox.com/ubuntu/ xenial main',
-        'packages': 'dropbox'},
-    }
+#specials_repositories = {
+    #'Google-Chrome': {
+        #'apt_key': ["wget -O /tmp/linux_signing_key.pub 'https://dl-ssl.google.com/linux/linux_signing_key.pub'",
+                    #"apt-key add /tmp/linux_signing_key.pub"],
+        #'source_list': '/etc/apt/sources.list.d/google-chrome.list',
+        #'deb_line': 'deb http://dl.google.com/linux/chrome/deb/ stable main',
+        #'packages': 'google-chrome-stable'},
+    #'Dropbox': {
+        #'apt_key': 'apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E',
+        #'source_list': '/etc/apt/sources.list.d/dropbox.list',
+        #'deb_line': 'deb http://linux.dropbox.com/ubuntu/ xenial main',
+        #'packages': 'dropbox'},
+    #'VirtualBox': {
+        #'apt_key': ["wget -o /tmp/virtualbox.pub 'https://www.virtualbox.org/download/oracle_vbox_2016.asc'",
+                    #'apt-key add /tmp/virtualbox.pub'],
+        #'source_list': '/etc/apt/sources.list.d/virtualbox.list',
+        #'deb_line': 'deb http://download.virtualbox.org/virtualbox/debian xenial contrib',
+        #'packages': 'virtualbox-5.0'},
+    #}
 
 
-class install_specials_repositories():
+#class install_specials_repositories():
 
-    def __init__(self, _specials_repositories, install_all,
-                    lock_file, linux_cmd):
-        self._specials_repositories = _specials_repositories
-        self.install_all = install_all
-        self.lock_file = lock_file
-        self.linux_cmd = linux_cmd
+    #def __init__(self, _specials_repositories, install_all,
+                    #lock_file, linux_cmd):
+        #self._specials_repositories = _specials_repositories
+        #self.install_all = install_all
+        #self.lock_file = lock_file
+        #self.linux_cmd = linux_cmd
 
-    def install_oneapp(self, tuple_package):
-        _q = True
-        if not self.install_all:
-            if not question('Do you want install %s?' % (tuple_package[0])):
-                _q = False
-        if _q:
-            app = self.linux_cmd
-            sr = tuple_package[1]
-            if not app.check_pgk(sr['packages']):
-                if not os.path.isfile(sr['source_list']):
-                    with open(sr['source_list'], "a") as applist:
-                        applist.write(sr['deb_line'])
-                for i in sr['apt_key']:
-                    app.command(i)
-                app.update_cmd()
-                app.multi_install_cmd(sr['packages'])
+    #def install_oneapp(self, tuple_package):
+        #_q = True
+        #if not self.install_all:
+            #if not question('Do you want install %s?' % (tuple_package[0])):
+                #_q = False
+        #if _q:
+            #app = self.linux_cmd
+            #sr = tuple_package[1]
+            #if not app.check_pgk(sr['packages']):
+                #if not os.path.isfile(sr['source_list']):
+                    #with open(sr['source_list'], "a") as applist:
+                        #applist.write(sr['deb_line'])
+                #for i in sr['apt_key']:
+                    #app.command(i)
+                #app.update_cmd()
+                #app.multi_install_cmd(sr['packages'])
 
-    def installApps(self):
-        for k in list(self._specials_repositories.items()):
-            self.install_oneapp(k)
+    #def installApps(self):
+        #for k in list(self._specials_repositories.items()):
+            #self.install_oneapp(k)
 
 
 def update_system(MyOS, stdout, lock_file):
@@ -164,8 +170,8 @@ def install(default_config, config, install_all, stdout,
     #IPTABLES_ASN = config.iptables_asn('iptables_asn')
     if install_all:
         yall.update_cmd()
-        yall.upgrade_cmd()
         yall.multi_install_cmd(default_packages)
+        yall.upgrade_cmd()
         if len(PACKAGES) > 0:
             yall.multi_install_cmd(PACKAGES)
         if MyOS == 'ubuntu':
@@ -175,8 +181,8 @@ def install(default_config, config, install_all, stdout,
         #fw = iptables()
         #fw.create_iptables(IPTABLES_ASN)
     else:
-        update_system(MyOS, stdout, lock_file)
         yall.multi_install_cmd(default_packages)
+        update_system(MyOS, stdout, lock_file)
         if len(PACKAGES) > 0:
             install_list_package(PACKAGES, lock_file)
         if MyOS == 'ubuntu':
@@ -186,9 +192,6 @@ def install(default_config, config, install_all, stdout,
         #firewall(IPTABLES_ASN)
         ##install_gits(GIT_PKG, DEST_GIT)
 
-    isr = install_specials_repositories(specials_repositories,
-                                        install_all, lock_file, yall)
-    isr.installApps()
     yall.autoremove_cmd()
 
 

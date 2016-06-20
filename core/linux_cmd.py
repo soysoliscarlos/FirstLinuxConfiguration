@@ -3,11 +3,12 @@ import os
 import sys
 import subprocess
 import re
+import pip
 #import socket
 #import shutil
 #import stat
 #import ipaddress
-import platform
+#import platform
 #import configparser
 import urllib.request
 
@@ -42,8 +43,6 @@ class Linux_Cmd():
         self.stdout = _stdout
         if _MyOS == 'ubuntu':
             _sudo = 'sudo'
-        elif _MyOS == 'debian':
-            _sudo = ''
         self._sudo = _sudo
         self._MyOS = _MyOS
 
@@ -52,7 +51,8 @@ class Linux_Cmd():
         if re.findall("^wget.+", _cmd):
             _get = True
         _cmd = _cmd.split()
-        _cmd.insert(0, self._sudo)
+        if self._MyOS == 'ubuntu':
+            _cmd.insert(0, self._sudo)
         #print(_cmd)
         if _get:
             if _cmd.index('-O'):
@@ -88,6 +88,26 @@ class Linux_Cmd():
         print('Upgrading Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
             self.command('apt upgrade -y')
+        for dist in pip.get_installed_distributions():
+            print(('Upgrading with pip "%s"' % (dist.project_name)))
+            #print(str(dist.split()))
+            if dist.project_name == 'Pillow':
+                #print('##############' + dist.project_name + '############')
+                self.multi_install_cmd('libjpeg8-dev')
+            elif dist.project_name == 'lxml':
+                #print('##############' + dist.project_name + '############')
+                self.multi_install_cmd('libxml2-dev libxslt-dev')
+            elif dist.project_name == 'dbus-python':
+                #print('##############' + dist.project_name + '############')
+                self.multi_install_cmd('libdbus-1-dev libdbus-glib-1-dev')
+            ## Upgrading all pip modules
+
+            pip.main(['install', '--upgrade', dist.project_name])
+            #if self._MyOS == 'ubuntu':
+                #self.command('-H pip3 install --upgrade ' + dist.project_name)
+            #else:
+                #self.command('pip3 install --upgrade ' + dist.project_name)
+    #subprocess.call("pip install --upgrade " + dist.project_name, shell=True)
         print('OK...\n')
 
     def autoremove_cmd(self):
