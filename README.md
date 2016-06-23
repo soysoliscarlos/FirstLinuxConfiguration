@@ -8,11 +8,15 @@ Download fcl.py and config_file.txt
 ## Tutorial
 Download the script file:
 ```sh
-   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/master/FirstLinuxConfiguration.py
+   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/0.1.0/FirstLinuxConfiguration.py
 ```
 Download de Config file:
 ```sh
-   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/master/config_file_FLC.conf
+   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/0.1.0/config_file_FLC.conf
+```
+Or Download the complete folder
+```sh
+   $ wget https://github.com/csoliss/FirstLinuxConfiguration/archive/0.1.0.zip
 ```
 NOTE: You should save the config file
 
