@@ -7,8 +7,6 @@ import configparser
 import subprocess
 import re
 import apt
-#import lsb_release
-#import apt.progress
 
 lock_file = '/var/run/flc.lock'
 defaultPackages = ('python-pip', 'python-dev')
@@ -137,10 +135,9 @@ def lock_process(_lock_file, MyOS):
         import psutil
     except ImportError:
         try:
-            import pip
+            import pip  # lint:ok
         except ImportError:
-
-            i.install_cmd('python3-pip')
+            i.install_cmd('python-pip')
             import pip  # lint:ok
         finally:
             pip.main(['install', 'psutil'])
