@@ -431,10 +431,10 @@ def install(config, install_all, stdout,
     yall = Linux_Cmd(MyOS, stdout)
     PACKAGES = config.joint_list_packages('packages')
     PPAS = config.ppas_and_pkg('ppas')
-    default_packages = defaultPackages
+    #default_packages = defaultPackages
     default_ubuntu = defaultUbuntu
     #yall.update_cmd()
-    yall.multi_install_cmd(default_packages)
+    #yall.multi_install_cmd(default_packages)
     if install_all:
         yall.upgrade_cmd()
         if len(PACKAGES) > 0:
@@ -534,7 +534,7 @@ if __name__ == '__main__':
         if value:
             if check_root():
                 yall = Linux_Cmd(MyOS, stdout)
-                yall.multi_install_cmd(default_packages
+                yall.multi_install_cmd(defaultPackages)
                 if not lock_process(lock_file, MyOS):
                     if is_connected():
                             install(config, install_all, stdout, lock_file,
