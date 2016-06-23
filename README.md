@@ -6,9 +6,19 @@ Since I started in the world of linux (over ten years), I've always had problems
 ## Installation
 Download fcl.py and config_file.txt
 ## Tutorial
+Download the script file:
+```sh
+   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/master/FirstLinuxConfiguration.py
+```
+Download de Config file:
+```sh
+   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/master/config_file_FLC.conf
+```
+NOTE: You should save the config file
+
 * Usage:
 ```sh
-   $ sudo flc.py config_file [options]
+   $ sudo python3 FirstLinuxConfig.py config_file [options]
 ```
 * Options:
    - **-y**        Answer "yes" to all questions
@@ -16,12 +26,12 @@ Download fcl.py and config_file.txt
    - **--help**    Display the help
 * Examples:
 ```sh
-    $ sudo flc.py config_file -v
-    $ sudo flc.py config_file -y
-    $ sudo flc.py config_file -v -y
-    $ sudo flc.py config_file -y -v
-    $ sudo flc.py --help
-    $ flc.py --help
+    $ sudo python3 FirstLinuxConfig.py config_file -v
+    $ sudo python3 FirstLinuxConfig.py config_file -y
+    $ sudo python3 FirstLinuxConfig.py config_file -v -y
+    $ sudo python3 FirstLinuxConfig.py config_file -y -v
+    $ sudo python3 FirstLinuxConfig.py --help
+    $ python3 FirstLinuxConfig.py --help
 ```
 #Español
 # FLC
