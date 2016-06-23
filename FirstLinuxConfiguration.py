@@ -7,11 +7,11 @@ import configparser
 import subprocess
 import re
 import apt
-import lsb_release
+#import lsb_release
 #import apt.progress
 
 lock_file = '/var/run/flc.lock'
-defaultPackages = ('python3-pip', 'python3-dev')
+defaultPackages = ('python-pip', 'python-dev')
 defaultUbuntu = ('whois', 'python3-launchpadlib')
 
 
@@ -24,10 +24,11 @@ def check_root():
         print(('Run: sudo %s \n' % (sys.argv[0])))
         sys.exit(1)  # Return if user is not root
 
-def check_OS_linux():
-    info = lsb_release.get_distro_information()['ID']
-    if info != 'Ubuntu' and info !='LinuxMint':
-        pass
+#def check_OS_linux():
+    #info = lsb_release.get_distro_information()
+    #print(info)
+    ##if info != 'Ubuntu' and info !='LinuxMint':
+        #pass
 
 class config_file():
 
@@ -259,6 +260,7 @@ class Linux_Cmd():
             self.cache.upgrade()
             self.cache.commit(apt.progress.base.AcquireProgress(),
                             apt.progress.base.InstallProgress())
+        ## Upgrading python modules
         for dist in pip.get_installed_distributions():
             try:
                 print(('Upgrading with pip "%s"' % (dist.project_name)))
