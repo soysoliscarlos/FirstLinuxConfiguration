@@ -138,8 +138,8 @@ def lock_process(_lock_file, MyOS):
             import pip  # lint:ok
         except ImportError:
             i.install_cmd('python-pip')
-            import pip  # lint:ok
         finally:
+            import pip  # lint:ok
             pip.main(['install', 'psutil'])
             import psutil  # lint:ok
     if os.path.isfile(_lock_file):
