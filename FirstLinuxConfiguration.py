@@ -28,6 +28,7 @@ def check_root():
     ##if info != 'Ubuntu' and info !='LinuxMint':
         #pass
 
+
 class config_file():
 
     def __init__(self, _file):
@@ -535,7 +536,8 @@ if __name__ == '__main__':
             if check_root():
                 yall = Linux_Cmd(MyOS, stdout)
                 yall.multi_install_cmd(defaultPackages)
-                if not lock_process(lock_file, MyOS):
+                lp = lock_process(lock_file, MyOS)
+                if not lp:
                     if is_connected():
                             install(config, install_all, stdout, lock_file,
                                     MyOS, OSVersion, OSName)
