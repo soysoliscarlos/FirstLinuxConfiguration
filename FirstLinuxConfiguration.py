@@ -7,6 +7,7 @@ import configparser
 import subprocess
 import re
 import apt
+import lsb_release
 #import apt.progress
 
 lock_file = '/var/run/flc.lock'
@@ -23,6 +24,10 @@ def check_root():
         print(('Run: sudo %s \n' % (sys.argv[0])))
         sys.exit(1)  # Return if user is not root
 
+def check_OS_linux():
+    info = lsb_release.get_distro_information()['ID']
+    if info != 'Ubuntu' and info !='LinuxMint':
+        pass
 
 class config_file():
 
@@ -429,7 +434,7 @@ def install(config, install_all, stdout,
     PPAS = config.ppas_and_pkg('ppas')
     default_packages = defaultPackages
     default_ubuntu = defaultUbuntu
-    yall.update_cmd()
+    #yall.update_cmd()
     yall.multi_install_cmd(default_packages)
     if install_all:
         yall.upgrade_cmd()
