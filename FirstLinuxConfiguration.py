@@ -9,7 +9,7 @@ import re
 import apt
 
 lock_file = '/var/run/flc.lock'
-defaultPackages = ('python-pip', 'python-dev')
+defaultPackages = ('python3-pip', 'python3-dev')
 defaultUbuntu = ('whois', 'python3-launchpadlib')
 
 
@@ -533,6 +533,8 @@ if __name__ == '__main__':
         #print(('myfile %s' % (general_config)))
         if value:
             if check_root():
+                yall = Linux_Cmd(MyOS, stdout)
+                yall.multi_install_cmd(default_packages
                 if not lock_process(lock_file, MyOS):
                     if is_connected():
                             install(config, install_all, stdout, lock_file,
