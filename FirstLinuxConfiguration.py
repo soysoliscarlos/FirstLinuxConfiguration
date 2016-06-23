@@ -343,14 +343,14 @@ class Linux_Cmd():
                 lp = Launchpad.login_anonymously('foo', 'production', None)
             except  httplib2.HttpLib2Error as e:
                 print(('Error connection to launchpad.net:', e))
-                sys.exit(1)
+                exit(1)
             ppa_name = _ppa
             m = re.search(r'^(ppa:)?(?P<user>[^/]+)/(?P<name>.+)', ppa_name)
             if m:
                 _user, name = m.group('user', 'name')
             else:
                 print(('Unvalid PPA name:', _ppa))
-                sys.exit(1)
+                exit(1)
             try:
                 owner = lp.people[_user]
                 ppa = owner.getPPAByName(name=name)
@@ -359,7 +359,7 @@ class Linux_Cmd():
             except lazr.restfulclient.errors.RestfulError as e:
                 print(('Error getting PPA info:', e))
                 return False
-                sys.exit(1)
+                exit(1)
 
     def check_repository(self, _repository):
         check = False
@@ -432,16 +432,12 @@ def install(config, install_all, stdout,
     yall = Linux_Cmd(MyOS, stdout)
     PACKAGES = config.joint_list_packages('packages')
     PPAS = config.ppas_and_pkg('ppas')
-    #default_packages = defaultPackages
-    default_ubuntu = defaultUbuntu
-    #yall.update_cmd()
-    #yall.multi_install_cmd(default_packages)
     if install_all:
         yall.upgrade_cmd()
         if len(PACKAGES) > 0:
             yall.multi_install_cmd(PACKAGES)
         if MyOS == 'ubuntu':
-            yall.multi_install_cmd(default_ubuntu)
+            yall.multi_install_cmd(defaultUbuntu)
             if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
                 yall.install_and_add_ppa(PPAS)
     else:
@@ -449,7 +445,7 @@ def install(config, install_all, stdout,
         if len(PACKAGES) > 0:
             install_list_package(PACKAGES, lock_file, MyOS, stdout)
         if MyOS == 'ubuntu':
-            yall.multi_install_cmd(default_ubuntu)
+            yall.multi_install_cmd(defaultUbuntu)
             if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
                 install_ppa(PPAS, lock_file)
     yall.autoremove_cmd()
@@ -530,15 +526,14 @@ if __name__ == '__main__':
         MyOS = general_config['MyOS'].lower()
         OSVersion = general_config['OSVersion']
         OSName = general_config['OSName'].lower()
-        #print(dict_options)
-        #print(('myfile %s' % (general_config)))
         if value:
             if check_root():
-                yall = Linux_Cmd(MyOS, stdout)
-                yall.multi_install_cmd(defaultPackages)
-                lp = lock_process(lock_file, MyOS)
-                if not lp:
-                    if is_connected():
+                if is_connected():
+                    yall = Linux_Cmd(MyOS, stdout)
+                    yall.update_cmd()
+                    yall.multi_install_cmd(defaultPackages)
+                    lp = lock_process(lock_file, MyOS)
+                    if not lp:
                             install(config, install_all, stdout, lock_file,
                                     MyOS, OSVersion, OSName)
                             del_file(lock_file)
