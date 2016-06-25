@@ -9,7 +9,7 @@ import re
 import apt
 
 lock_file = '/var/run/flc.lock'
-defaultPackages = ('python3-pip', 'python3-dev')
+defaultPackages = ('python3-dev')
 defaultUbuntu = ('whois', 'python3-launchpadlib')
 
 
@@ -387,8 +387,8 @@ class Linux_Cmd():
         for sl in _source_list:
             if re.search('\S+.list$', sl):
                 if re.search(repo, sl):
-                    print('Repository already exist: "{}"\n'.format(
-                                                            _repository))
+                    print(('Repository already exist: "{}"\n'.format(
+                                                            _repository)))
                     check = True
         return check
 
@@ -403,18 +403,18 @@ def help_app(_message=False):
     if _message:
         print('Error: %s \n' % (_message))
     print('Usage:')
-    print('    sudo %s config_file [options]\n' % (sys.argv[0]))
+    print('    sudo python3 %s config_file [options]\n' % (sys.argv[0]))
     print('Options:')
     print('    -y        Answer "yes" to all questions')
     print('    -v        View standart output')
     print('    --help    Display this message\n')
     print('Examples:')
-    print('    sudo %s config_file -v' % (sys.argv[0]))
-    print('    sudo %s config_file -y' % (sys.argv[0]))
-    print('    sudo %s config_file -v -y' % (sys.argv[0]))
-    print('    sudo %s config_file -y -v' % (sys.argv[0]))
-    print('    sudo %s --help' % (sys.argv[0]))
-    print('    %s --help\n' % (sys.argv[0]))
+    print('    sudo python3 %s config_file -v' % (sys.argv[0]))
+    print('    sudo python3 %s config_file -y' % (sys.argv[0]))
+    print('    sudo python3 %s config_file -v -y' % (sys.argv[0]))
+    print('    sudo python3 %s config_file -y -v' % (sys.argv[0]))
+    print('    sudo python3 %s --help' % (sys.argv[0]))
+    print('    python3 %s --help\n' % (sys.argv[0]))
     exit(1)
 
 
@@ -583,18 +583,10 @@ if __name__ == '__main__':
             if check_root():
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
-                    #try:
                     yall.update_cmd()
                     yall.command('easy_install -U pip')
                     yall.multi_install_cmd(yall.review_pgks(
                                             defaultPackages))
-                    #except SystemError:
-                        #print('System Error: Updating packages again...\n')
-                        #yall.update_cmd()
-                        #yall.multi_install_cmd(yall.review_pgks(
-                                                #defaultPackages))
-                    #finally:
-                        #yall.command('easy_install -U pip')
                     if not lock_process(lock_file, MyOS):
                             install(config, install_all, stdout, lock_file,
                                     MyOS, OSVersion, OSName)
