@@ -9,7 +9,7 @@ import re
 import apt
 
 lock_file = '/var/run/flc.lock'
-defaultPackages = ('python3-dev')
+defaultPackages = ('python3-pip', 'python3-dev')
 defaultUbuntu = ('whois', 'python3-launchpadlib')
 
 
@@ -138,8 +138,8 @@ def lock_process(_lock_file, MyOS):
         try:
             import pip  # lint:ok
         except ImportError:
-            i.command('easy_install -U pip')
-            #i.install_cmd('python-pip')
+            #i.command('easy_install -U pip')
+            i.install_cmd('python3-pip')
         finally:
             import pip  # lint:ok
             pip.main(['install', 'psutil'])
@@ -237,8 +237,8 @@ class Linux_Cmd():
         try:
             import pip
         except ImportError:
-            #self.install_cmd('python3-pip')
-            self.command('easy_install -U pip')
+            self.install_cmd('python3-pip')
+            #self.command('easy_install -U pip')
             import pip  # lint:ok
         for dist in pip.get_installed_distributions(False):
             try:
@@ -584,7 +584,7 @@ if __name__ == '__main__':
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
                     yall.update_cmd()
-                    yall.command('easy_install -U pip')
+                    #yall.command('easy_install -U pip')
                     yall.multi_install_cmd(yall.review_pgks(
                                             defaultPackages))
                     if not lock_process(lock_file, MyOS):
