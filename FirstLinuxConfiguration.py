@@ -331,21 +331,18 @@ class Linux_Cmd():
                     count += 1
 
     def install_cmd(self, _package):
-        #if not self.check_pgk(_package):
             if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
                 print(('Installing {}'.format(_package)))
                 self.command('apt-get install -y {}'.format(_package))
-                #pkg = self.cache[_package]
-                #pkg.mark_install()
-                #self.cache.commit(apt.progress.base.AcquireProgress(),
-                            #apt.progress.base.InstallProgress())
                 print('OK...\n')
 
     def multi_install_cmd(self, _packages):
         if len(_packages) > 0:
             if type(_packages) is tuple or type(_packages) is list:
-                for _package in _packages:
-                    self.install_cmd(_package)
+                str_packages = ' '.join(_packages)
+                self.install_cmd(str_packages)
+                #for _package in _packages:
+                    #self.install_cmd(_package)
             else:
                 self.install_cmd(_packages)
 
