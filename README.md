@@ -3,20 +3,18 @@
 First Linux Configuration (FLC) is a python script  that looking for load all package that I need in my Linux
 ## Introduction
 Since I started in the world of linux (over ten years), I've always had problems with the distribution of shift and was to reinstall the whole system, but I resented the idea of revisiting what were the packages used. this idea was born this project, intended to have a program that I will configure the operating system as it was in the beginning, I hope you like this little script
-## Installation
-Download fcl.py and config_file.txt
 ## Tutorial
 Download the script file:
 ```sh
-   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/0.1.0/FirstLinuxConfiguration.py
+   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/master/FirstLinuxConfiguration.py
 ```
 Download de Config file:
 ```sh
-   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/0.1.0/config_file_FLC.conf
+   $ wget https://raw.githubusercontent.com/csoliss/FirstLinuxConfiguration/master/config_file_FLC.conf
 ```
 Or Download the complete folder
 ```sh
-   $ wget https://github.com/csoliss/FirstLinuxConfiguration/archive/0.1.0.zip
+   $ wget https://github.com/csoliss/FirstLinuxConfiguration/archive/master.zip
 ```
 NOTE: You should save the config file
 
