@@ -138,10 +138,10 @@ def lock_process(_lock_file, MyOS):
         try:
             import pip  # lint:ok
         except ImportError:
-            #i.command('easy_install -U pip')
             i.install_cmd('python3-pip')
-        finally:
+            i.command('easy_install3 -U pip')
             import pip  # lint:ok
+        finally:
             pip.main(['install', 'psutil'])
             import psutil  # lint:ok
     if os.path.isfile(_lock_file):
@@ -177,7 +177,6 @@ def question(_Q, lock_file):
             sys.exit(0)
         else:
             print("\nYou didn't choose a valid option. Select 'Y', 'y', 'N', 'n', 'Q' or 'q'\n")
-
 
 
 def del_file(_file):
@@ -233,7 +232,7 @@ class Linux_Cmd():
             import pip
         except ImportError:
             self.install_cmd('python3-pip')
-            self.command('easy_install -U pip')
+            self.command('easy_install3 -U pip')
             import pip  # lint:ok
         for dist in pip.get_installed_distributions(False):
             try:
