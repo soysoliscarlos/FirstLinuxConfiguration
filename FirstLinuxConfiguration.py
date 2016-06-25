@@ -251,6 +251,7 @@ class Linux_Cmd():
             import pip
         except ImportError:
             self.install_cmd('python3-pip')
+            self.command('easy_install -U pip')
             import pip  # lint:ok
         print('Upgrading Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
