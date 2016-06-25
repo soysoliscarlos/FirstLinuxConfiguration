@@ -163,30 +163,6 @@ def lock_process(_lock_file, MyOS):
             lf.write(str(os.getpid()) + '\n')
         return False
 
-        pip.main(['install', 'psutil'])
-        import psutil  # lint:ok
-    if os.path.isfile(_lock_file):
-        #print('if 2')
-        with open(_lock_file, "r") as lf:
-            pid = lf.read()
-            pid = int(pid)
-        if psutil.pid_exists(pid):
-            #print('file exist')
-            print('The process is already running...')
-            print('Wait until the process is complete or delete the file:')
-            print((('%s\n') % (_lock_file)))
-            sys.exit(0)
-            return True
-        else:
-            with open(_lock_file, "w") as lf:
-                lf.write(str(os.getpid()) + '\n')
-            return False
-    elif not os.path.isfile(_lock_file):
-        #print('if 1')
-        with open(_lock_file, "a") as lf:
-            lf.write(str(os.getpid()) + '\n')
-        return False
-
 
 def question(_Q, lock_file):
     _count = False
@@ -261,7 +237,7 @@ class Linux_Cmd():
         try:
             import pip
         except ImportError:
-            self.install_cmd('python3-pip')
+            #self.install_cmd('python3-pip')
             self.command('easy_install -U pip')
             import pip  # lint:ok
         for dist in pip.get_installed_distributions(False):
@@ -609,6 +585,7 @@ if __name__ == '__main__':
                     yall = Linux_Cmd(MyOS, stdout)
                     #try:
                     yall.update_cmd()
+                    yall.command('easy_install -U pip')
                     yall.multi_install_cmd(yall.review_pgks(
                                             defaultPackages))
                     #except SystemError:
