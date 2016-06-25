@@ -571,5 +571,6 @@ if __name__ == '__main__':
                                     MyOS, OSVersion, OSName)
                             del_file(lock_file)
     except KeyboardInterrupt:
-        print('\nExit by the user by pressing "Ctrl + c"...\n')
         del_file(lock_file)
+        print('\nExit by the user by pressing "Ctrl + c"...\n')
+
