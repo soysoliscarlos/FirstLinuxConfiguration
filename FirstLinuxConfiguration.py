@@ -216,9 +216,9 @@ class Linux_Cmd():
         if _MyOS == 'ubuntu' or _MyOS == 'debian':
             cache = apt.Cache()
             self.cache = cache
-            self.cache.update()
-            self.cache.commit(apt.progress.base.AcquireProgress(),
-                            apt.progress.base.InstallProgress())
+            #self.cache.update()
+            #self.cache.commit(apt.progress.base.AcquireProgress(),
+                            #apt.progress.base.InstallProgress())
         _sudo = ''
         _MyOS = _MyOS.lower()
         self.stdout = _stdout
@@ -300,25 +300,53 @@ class Linux_Cmd():
         else:
             help_app('It is not a supported OS')
 
+    def review_pgks(self, _package):
+        install = []
+        if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
+            if type(_package) is tuple or type(_package) is list:
+                for p in tuple(_package):
+                    try:
+                        if not self.cache[p].is_installed:
+                            install.append(p)
+                        else:
+                            print(('"{}" is already installed...\n'.format(p)))
+                    except:
+                        install.append(p)
+                if len(install) > 0:
+                    return False, install
+            else:
+                if not self.cache[_package].is_installed:
+                    install.append(_package)
+                    return False, install
+                else:
+                    print(('"{}" is already installed...\n'.format(_package)))
+            return True, install
+        else:
+            help_app('It is not a supported OS')
+
     def install_and_add_ppa(self, _tuple_ppa):
         if self._MyOS == 'ubuntu':
             count = 1
             _ppas = _tuple_ppa[0]
             _packages = _tuple_ppa[1]
+            vpkg = yall.review_pgks(_tuple_ppa[1])
+            if not vpkg[0]:
+                _packages = vpkg[1]
             for _ppa in _ppas:
                 print(('Validating PPA: %s' % (_ppa)))
-                if self.ppa_info(_ppa):
-                    if not self.check_repository(_ppa):
+                if not self.check_repository(_ppa):
+                    if self.ppa_info(_ppa):
                         print(('Adding PPA repository %s' % (_ppa)))
                         self.command('add-apt-repository -y %s' % (_ppa))
                         self.update_cmd()
                 if count == len(_ppas):
-                    self.multi_install_cmd(_packages)
+                    if not vpkg[0]:
+                        self.multi_install_cmd(_packages)
                 else:
                     count += 1
 
     def install_cmd(self, _package):
-        if not self.check_pgk(_package):
+        #if not self.check_pgk(_package):
             if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
                 print(('Installing %s' % (_package)))
                 pkg = self.cache[_package]
@@ -328,11 +356,12 @@ class Linux_Cmd():
                 print('OK...\n')
 
     def multi_install_cmd(self, _packages):
-        if type(_packages) is tuple or type(_packages) is list:
-            for _package in _packages:
-                self.install_cmd(_package)
-        else:
-            self.install_cmd(_packages)
+        if not len(_packages) == 0:
+            if type(_packages) is tuple or type(_packages) is list:
+                for _package in _packages:
+                    self.install_cmd(_package)
+            else:
+                self.install_cmd(_packages)
 
     def ppa_info(self, _ppa):
         if self._MyOS == 'ubuntu':
@@ -365,8 +394,6 @@ class Linux_Cmd():
         check = False
         _source_list = os.listdir('/etc/apt/sources.list.d/')
         repo = re.findall('/+\S+', _repository)
-        #print(repo)
-
         if repo:
             repo = repo[0].lstrip('/')
         else:
@@ -374,9 +401,10 @@ class Linux_Cmd():
         for sl in _source_list:
             if re.search('\S+.list$', sl):
                 if re.search(repo, sl):
-                    print('Repository already exist\n')
+                    print('Repository already exist: "{}"\n'.format(
+                                                            _repository))
                     check = True
-                    return check
+        return check
 
     def git_clone(self, _git, _dest=''):
         if not _dest == '':
@@ -419,34 +447,69 @@ def install_list_package(_lst_pkg, lock_file, MyOS, stdout):
 
 
 def install_ppa(_tuple_ppa, lock_file):
+    ask = False
     _ppas = _tuple_ppa[0]
     _packages = _tuple_ppa[1]
-    Q = 'Do you want add the PPA "%s" and install %s?' % (_ppas, _packages)
-    if question(Q, lock_file):
-        ppa = Linux_Cmd(MyOS, stdout)
-        ppa.install_and_add_ppa(_tuple_ppa)
+    str_ppas = ''.join(_ppas)
+    str_packages = ''.join(_packages)
+    if len(_ppas) > 0 and len(_packages) > 0:
+        ask = True
+        Q = 'Do you want add the PPA: "{}" and install: "{}"?'.format(
+            str_ppas, str_packages)
+    elif len(_ppas) == 0 and len(_packages) == 0:
+        pass
+    elif len(_ppas) == 0:
+        ask = True
+        Q = 'Do you want install: "{}"?'.format(str_packages)
+    elif len(_packages) == 0:
+        ask = True
+        Q = 'Do you want add the PPA: "{}"'.format(str_ppas)
+    if ask:
+        if question(Q, lock_file):
+            ppa = Linux_Cmd(MyOS, stdout)
+            ppa.install_and_add_ppa(_tuple_ppa)
 
 
 def install(config, install_all, stdout,
             lock_file, MyOS, OSVersion, OSName):
     yall = Linux_Cmd(MyOS, stdout)
     PACKAGES = config.joint_list_packages('packages')
-    PPAS = config.ppas_and_pkg('ppas')
+    PPAS = list(config.ppas_and_pkg('ppas'))
     if install_all:
-        yall.upgrade_cmd()
+        #yall.upgrade_cmd()
         if len(PACKAGES) > 0:
-            yall.multi_install_cmd(PACKAGES)
+            vpkg = yall.review_pgks(PACKAGES)
+            if not vpkg[0]:
+                yall.multi_install_cmd(vpkg[1])
         if MyOS == 'ubuntu':
-            yall.multi_install_cmd(defaultUbuntu)
+            vpkg = yall.review_pgks(defaultUbuntu)
+            if not vpkg[0]:
+                yall.multi_install_cmd(vpkg[1])
             if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
                 yall.install_and_add_ppa(PPAS)
     else:
-        upgrade_system(MyOS, stdout, lock_file)
+        #upgrade_system(MyOS, stdout, lock_file)
         if len(PACKAGES) > 0:
-            install_list_package(PACKAGES, lock_file, MyOS, stdout)
+            vpkg = yall.review_pgks(PACKAGES)
+            if not vpkg[0]:
+                install_list_package(vpkg[1], lock_file, MyOS, stdout)
         if MyOS == 'ubuntu':
-            yall.multi_install_cmd(defaultUbuntu)
+            vpkg = yall.review_pgks(defaultUbuntu)
+            if not vpkg[0]:
+                yall.multi_install_cmd(vpkg[1])
             if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
+                #print(PPAS)
+                vpkg = yall.review_pgks(PPAS[1])
+                if not vpkg[0]:
+                    PPAS[1] = vpkg[1]
+                else:
+                    PPAS[1] = []
+                tmpppa = []
+                for ppa in PPAS[0]:
+                    if not yall.check_repository(ppa):
+                        tmpppa.append(ppa)
+                PPAS[0] = tmpppa
+                #print(PPAS)
                 install_ppa(PPAS, lock_file)
     yall.autoremove_cmd()
 
@@ -530,13 +593,16 @@ if __name__ == '__main__':
             if check_root():
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
-                    yall.update_cmd()
-                    yall.multi_install_cmd(defaultPackages)
-                    lp = lock_process(lock_file, MyOS)
-                    if not lp:
+                    #yall.update_cmd()
+                    vpkg = yall.review_pgks(defaultPackages)
+                    if not vpkg[0]:
+                        defaultPackages = vpkg[1]
+                        yall.multi_install_cmd(defaultPackages)
+                    #lp = lock_process(lock_file, MyOS)
+                    if not lock_process(lock_file, MyOS):
                             install(config, install_all, stdout, lock_file,
                                     MyOS, OSVersion, OSName)
                             del_file(lock_file)
     except KeyboardInterrupt:
         print('\nExit by the user by pressing "Ctrl + c"...\n')
-        del_file(lock_file, MyOS)
+        del_file(lock_file)
