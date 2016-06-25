@@ -460,7 +460,6 @@ def install(config, install_all, stdout,
         ppas = tmpppa
         packages_ppas = yall.review_pgks(PPAS[1])
         PPAS = (ppas, packages_ppas)
-    elif
     ## Answer "yes" to all questions
     if install_all:
         ## Upgrading all packages and python modules with pip
