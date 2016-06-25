@@ -445,7 +445,7 @@ def upgrade_system(MyOS, stdout, lock_file):
 
 def install_list_package(_lst_pkg, lock_file, MyOS, stdout):
     if len(_lst_pkg) > 0:
-        str_lst_pkg = ''.join(_lst_pkg)
+        str_lst_pkg = ', '.join(_lst_pkg)
         Q = 'Do you want install %s?' % (str_lst_pkg)
         if question(Q, lock_file):
             pkg = Linux_Cmd(MyOS, stdout)
@@ -456,8 +456,8 @@ def install_ppa(_tuple_ppa, lock_file):
     ask = False
     _ppas = _tuple_ppa[0]
     _packages = _tuple_ppa[1]
-    str_ppas = ''.join(_ppas)
-    str_packages = ''.join(_packages)
+    str_ppas = ', '.join(_ppas)
+    str_packages = ', '.join(_packages)
     if len(_ppas) > 0 and len(_packages) > 0:
         ask = True
         Q = 'Do you want add the PPA: "{}" and install: "{}"?'.format(
