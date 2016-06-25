@@ -176,9 +176,8 @@ def question(_Q, lock_file):
             os.remove(lock_file)
             sys.exit(0)
         else:
-            print('')
-            print("You didn't choose a valid option. Select 'Y' or 'N'\n")
-            print('')
+            print("\nYou didn't choose a valid option. Select 'Y', 'y', 'N', 'n', 'Q' or 'q'\n")
+
 
 
 def del_file(_file):
@@ -193,9 +192,6 @@ class Linux_Cmd():
         if _MyOS == 'ubuntu' or _MyOS == 'debian':
             cache = apt.Cache()
             self.cache = cache
-            #self.cache.update()
-            #self.cache.commit(apt.progress.base.AcquireProgress(),
-                            #apt.progress.base.InstallProgress())
         _sudo = ''
         _MyOS = _MyOS.lower()
         self.stdout = _stdout
@@ -205,6 +201,7 @@ class Linux_Cmd():
         self._MyOS = _MyOS
 
     def command(self, _cmd, out_file=False):
+        ## Executing linux command
         _cmd = _cmd.split()
         if self._MyOS == 'ubuntu':
             _cmd.insert(0, self._sudo)
@@ -218,27 +215,25 @@ class Linux_Cmd():
             subprocess.check_call(_cmd, stdout=of)
 
     def update_cmd(self):
+        ## Update list of packages
         print('Updating List of Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
             self.command('apt-get update')
         print('OK...\n')
 
     def upgrade_cmd(self):
+        ## Upgrading all packages
         print('Upgrading Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
             self.command('apt-get upgrade -y')
-            #self.cache.open(None)
-            #self.cache.upgrade()
-            #self.cache.commit(apt.progress.base.AcquireProgress(),
-                            #apt.progress.base.InstallProgress())
-        ## Upgrading python modules
 
     def upgrade_pip(self):
+        ## Upgrading python modules
         try:
             import pip
         except ImportError:
             self.install_cmd('python3-pip')
-            #self.command('easy_install -U pip')
+            self.command('easy_install -U pip')
             import pip  # lint:ok
         for dist in pip.get_installed_distributions(False):
             try:
@@ -269,23 +264,14 @@ class Linux_Cmd():
         print('OK...\n')
 
     def autoremove_cmd(self):
+        ## Autoremoving packages
         print('Autoremoving Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
             self.command('apt-get autoremove -y')
         print('OK...\n')
 
-    def check_pgk(self, _package):
-        if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
-            if self.cache[_package].is_installed:
-                print(("{} is already installed...\n".format(_package)))
-                return True
-            else:
-                print(("{} is not installed...\n".format(_package)))
-                return False
-        else:
-            help_app('It is not a supported OS')
-
     def review_pgks(self, _package):
+        ## Checking if package exist
         install = []
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
             if type(_package) is tuple or type(_package) is list:
@@ -341,8 +327,6 @@ class Linux_Cmd():
             if type(_packages) is tuple or type(_packages) is list:
                 str_packages = ' '.join(_packages)
                 self.install_cmd(str_packages)
-                #for _package in _packages:
-                    #self.install_cmd(_package)
             else:
                 self.install_cmd(_packages)
 
@@ -477,6 +461,7 @@ def install(config, install_all, stdout,
         ppas = tmpppa
         packages_ppas = yall.review_pgks(PPAS[1])
         PPAS = (ppas, packages_ppas)
+    elif
     ## Answer "yes" to all questions
     if install_all:
         ## Upgrading all packages and python modules with pip
@@ -581,7 +566,6 @@ if __name__ == '__main__':
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
                     yall.update_cmd()
-                    #yall.command('easy_install -U pip')
                     yall.multi_install_cmd(yall.review_pgks(
                                             defaultPackages))
                     if not lock_process(lock_file, MyOS):
