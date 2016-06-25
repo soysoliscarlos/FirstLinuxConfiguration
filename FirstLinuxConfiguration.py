@@ -215,14 +215,14 @@ class Linux_Cmd():
 
     def update_cmd(self):
         ## Update list of packages
-        print('Updating List of Packages...\n')
+        print('Updating list of  OS Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
             self.command('apt-get update')
         print('OK...\n')
 
     def upgrade_cmd(self):
         ## Upgrading all packages
-        print('Upgrading Packages...\n')
+        print('Upgrading OS Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
             self.command('apt-get upgrade -y')
 
@@ -235,8 +235,10 @@ class Linux_Cmd():
             self.command('easy_install3 -U pip')
             import pip  # lint:ok
         for dist in pip.get_installed_distributions(False):
+            print('Upgrading python modules with pip')
             try:
-                print(('Checking/Upgrading with pip "{}"'.format(
+                if self.stdout:
+                    print(('Checking/Upgrading with pip "{}"'.format(
                                                         dist.project_name)))
                 if str(dist.project_name) == 'Pillow':
                     if self._MyOS == 'ubuntu':
