@@ -476,7 +476,7 @@ def install(config, install_all, stdout,
     PACKAGES = config.joint_list_packages('packages')
     PPAS = list(config.ppas_and_pkg('ppas'))
     if install_all:
-        #yall.upgrade_cmd()
+        yall.upgrade_cmd()
         if len(PACKAGES) > 0:
             vpkg = yall.review_pgks(PACKAGES)
             if not vpkg[0]:
@@ -488,7 +488,7 @@ def install(config, install_all, stdout,
             if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
                 yall.install_and_add_ppa(PPAS)
     else:
-        #upgrade_system(MyOS, stdout, lock_file)
+        upgrade_system(MyOS, stdout, lock_file)
         if len(PACKAGES) > 0:
             vpkg = yall.review_pgks(PACKAGES)
             if not vpkg[0]:
@@ -593,7 +593,7 @@ if __name__ == '__main__':
             if check_root():
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
-                    #yall.update_cmd()
+                    yall.update_cmd()
                     vpkg = yall.review_pgks(defaultPackages)
                     if not vpkg[0]:
                         defaultPackages = vpkg[1]
