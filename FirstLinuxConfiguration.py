@@ -357,7 +357,7 @@ class Linux_Cmd():
     def install_cmd(self, _package):
         #if not self.check_pgk(_package):
             if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
-                print(('Installing %s'.format(_package)))
+                print(('Installing {}'.format(_package)))
                 self.command('apt-get install -y {}'.format(_package))
                 #pkg = self.cache[_package]
                 #pkg.mark_install()
@@ -455,7 +455,7 @@ def upgrade_system(MyOS, stdout, lock_file):
 def install_list_package(_lst_pkg, lock_file, MyOS, stdout):
     if len(_lst_pkg) > 0:
         str_lst_pkg = ', '.join(_lst_pkg)
-        Q = 'Do you want install %s?' % (str_lst_pkg)
+        Q = 'Do you want install {}?'.format(str_lst_pkg)
         if question(Q, lock_file):
             pkg = Linux_Cmd(MyOS, stdout)
             pkg.multi_install_cmd(_lst_pkg)
@@ -607,17 +607,17 @@ if __name__ == '__main__':
             if check_root():
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
-                    try:
-                        yall.update_cmd()
-                        yall.multi_install_cmd(yall.review_pgks(
-                                                defaultPackages))
-                    except SystemError:
-                        print('System Error: Updating packages again...\n')
-                        yall.update_cmd()
-                        yall.multi_install_cmd(yall.review_pgks(
-                                                defaultPackages))
-                    finally:
-                        yall.command('easy_install -U pip')
+                    #try:
+                    yall.update_cmd()
+                    yall.multi_install_cmd(yall.review_pgks(
+                                            defaultPackages))
+                    #except SystemError:
+                        #print('System Error: Updating packages again...\n')
+                        #yall.update_cmd()
+                        #yall.multi_install_cmd(yall.review_pgks(
+                                                #defaultPackages))
+                    #finally:
+                        #yall.command('easy_install -U pip')
                     if not lock_process(lock_file, MyOS):
                             install(config, install_all, stdout, lock_file,
                                     MyOS, OSVersion, OSName)
