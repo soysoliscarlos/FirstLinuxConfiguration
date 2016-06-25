@@ -248,19 +248,22 @@ class Linux_Cmd():
         print('OK...\n')
 
     def upgrade_cmd(self):
+        print('Upgrading Packages...\n')
+        if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
+            self.command('apt-get upgrade -y')
+            #self.cache.open(None)
+            #self.cache.upgrade()
+            #self.cache.commit(apt.progress.base.AcquireProgress(),
+                            #apt.progress.base.InstallProgress())
+        ## Upgrading python modules
+
+    def upgrade_pip(self):
         try:
             import pip
         except ImportError:
-            #self.install_cmd('python3-pip')
+            self.install_cmd('python3-pip')
             self.command('easy_install -U pip')
             import pip  # lint:ok
-        print('Upgrading Packages...\n')
-        if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
-            self.cache.open(None)
-            self.cache.upgrade()
-            self.cache.commit(apt.progress.base.AcquireProgress(),
-                            apt.progress.base.InstallProgress())
-        ## Upgrading python modules
         for dist in pip.get_installed_distributions(False):
             try:
                 print(('Checking/Upgrading with pip "{}"'.format(
@@ -354,11 +357,12 @@ class Linux_Cmd():
     def install_cmd(self, _package):
         #if not self.check_pgk(_package):
             if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
-                print(('Installing %s' % (_package)))
-                pkg = self.cache[_package]
-                pkg.mark_install()
-                self.cache.commit(apt.progress.base.AcquireProgress(),
-                            apt.progress.base.InstallProgress())
+                print(('Installing %s'.format(_package)))
+                self.command('apt-get install -y {}'.format(_package))
+                #pkg = self.cache[_package]
+                #pkg.mark_install()
+                #self.cache.commit(apt.progress.base.AcquireProgress(),
+                            #apt.progress.base.InstallProgress())
                 print('OK...\n')
 
     def multi_install_cmd(self, _packages):
@@ -439,10 +443,13 @@ def help_app(_message=False):
 
 
 def upgrade_system(MyOS, stdout, lock_file):
+    update = Linux_Cmd(MyOS, stdout)
     Q = 'Do you want upgrade the system?'
     if question(Q, lock_file):
-        update = Linux_Cmd(MyOS, stdout)
         update.upgrade_cmd()
+    Q = 'Do you want upgrade the python modules(pip)?'
+    if question(Q, lock_file):
+        update.upgrade_pip()
 
 
 def install_list_package(_lst_pkg, lock_file, MyOS, stdout):
@@ -501,6 +508,7 @@ def install(config, install_all, stdout,
     if install_all:
         ## Upgrading all packages and python modules with pip
         yall.upgrade_cmd()
+        yall.upgrade_pip()
         if len(PACKAGES) > 0:
             yall.multi_install_cmd(yall.review_pgks(PACKAGES))
         ## Special packages and ppa's for ubuntu
@@ -514,7 +522,6 @@ def install(config, install_all, stdout,
         if len(PACKAGES) > 0:
             install_list_package(yall.review_pgks(PACKAGES), lock_file,
                                                     MyOS, stdout)
-
         if MyOS == 'ubuntu':
             if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
                 install_ppa(PPAS, lock_file)
@@ -605,7 +612,7 @@ if __name__ == '__main__':
                         yall.multi_install_cmd(yall.review_pgks(
                                                 defaultPackages))
                     except SystemError:
-                        print('System Error - Update the source list again')
+                        print('System Error: Updating packages again...\n')
                         yall.update_cmd()
                         yall.multi_install_cmd(yall.review_pgks(
                                                 defaultPackages))
