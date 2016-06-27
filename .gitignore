@@ -10,4 +10,5 @@ venv/
 *.swp
 my_linux_config.txt
 chuleta.txt
+myBackupConfiguration/
 

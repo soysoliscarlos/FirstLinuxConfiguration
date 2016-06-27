@@ -22,12 +22,6 @@ def check_root():
         print(('Run: sudo %s \n' % (sys.argv[0])))
         sys.exit(1)  # Return if user is not root
 
-#def check_OS_linux():
-    #info = lsb_release.get_distro_information()
-    #print(info)
-    ##if info != 'Ubuntu' and info !='LinuxMint':
-        #pass
-
 
 class config_file():
 
@@ -217,14 +211,26 @@ class Linux_Cmd():
         ## Update list of packages
         print('Updating list of  OS Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
-            self.command('apt-get update')
+            try:
+                self.command('apt update')
+            except:
+                try:
+                    self.command('aptitude update')
+                except:
+                    self.command('apt-get update')
         print('OK...\n')
 
     def upgrade_cmd(self):
         ## Upgrading all packages
         print('Upgrading OS Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
-            self.command('apt-get upgrade -y')
+            try:
+                self.command('apt upgrade -y')
+            except:
+                try:
+                    self.command('aptitude upgrade -y')
+                except:
+                    self.command('apt-get upgrade -y')
 
     def upgrade_pip(self):
         ## Upgrading python modules
@@ -268,7 +274,13 @@ class Linux_Cmd():
         ## Autoremoving packages
         print('Autoremoving Packages...\n')
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
-            self.command('apt-get autoremove -y')
+            try:
+                self.command('apt autoremove -y')
+            except:
+                try:
+                    self.command('aptitude autoremove -y')
+                except:
+                    self.command('apt-get autoremove -y')
         print('OK...\n')
 
     def review_pgks(self, _package):
@@ -318,10 +330,32 @@ class Linux_Cmd():
                     count += 1
 
     def install_cmd(self, _package):
-            if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
-                print(('Installing {}'.format(_package)))
-                self.command('apt-get install -y {}'.format(_package))
-                print('OK...\n')
+        if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
+            print(('Installing {}'.format(_package)))
+            try:
+                self.command('apt install -y {}'.format(_package))
+            except:
+                try:
+                    self.command('aptitude install -y {}'.format(_package))
+                except:
+                    self.command('apt-get install -y {}'.format(_package))
+            print('OK...\n')
+
+    def pkgRemove(self, _packages):
+        if type(_packages) is tuple or type(_packages) is list:
+            _packages = ' '.join(_packages)
+        if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
+            print(('Removing {}'.format(_packages)))
+            try:
+                self.command('apt remove --purge -y {}'.format(_packages))
+            except:
+                try:
+                    self.command('aptitude remove --purge -y {}'.format(
+                                                                    _packages))
+                except:
+                    self.command('apt-get remove --purge -y {}'.format(
+                                                                    _packages))
+            print('OK...\n')
 
     def multi_install_cmd(self, _packages):
         if len(_packages) > 0:
@@ -410,6 +444,14 @@ def upgrade_system(MyOS, stdout, lock_file):
         update.upgrade_pip()
 
 
+def remove_packages(packages, MyOS, stdout, lock_file):
+    rm = Linux_Cmd(MyOS, stdout)
+    str_pkg = ', '.join(packages)
+    Q = 'Do you want remove {}?'.format(str_pkg)
+    if question(Q, lock_file):
+        rm.pkgRemove(packages)
+
+
 def install_list_package(_lst_pkg, lock_file, MyOS, stdout):
     if len(_lst_pkg) > 0:
         str_lst_pkg = ', '.join(_lst_pkg)
@@ -417,6 +459,18 @@ def install_list_package(_lst_pkg, lock_file, MyOS, stdout):
         if question(Q, lock_file):
             pkg = Linux_Cmd(MyOS, stdout)
             pkg.multi_install_cmd(_lst_pkg)
+
+
+def backup_conf_files(conf_files, lock_file, MyOS, stdout):
+    nameFolder = conf_files['folder']
+    if not os.path.isdir(nameFolder):
+        os.mkdir(nameFolder)
+    print(('Your backup folder is: {}'.format(os.path.abspath(nameFolder))))
+    for f in conf_files:
+        if not f == 'folder':
+            print(('Backing up {}'.format(f)))
+            print(conf_files[f])
+    pass
 
 
 def install_ppa(_tuple_ppa, lock_file):
@@ -447,6 +501,8 @@ def install(config, install_all, stdout,
             lock_file, MyOS, OSVersion, OSName):
     yall = Linux_Cmd(MyOS, stdout)
     PACKAGES = config.joint_list_packages('packages')
+    delpackages = config.joint_list_packages('remove-packages')
+    brc = config.read_section('Backup-Restore-Configuration')
     ## Variable for ubuntu
     if MyOS == 'ubuntu':
         ## Installing default packages for ubuntu
@@ -463,27 +519,33 @@ def install(config, install_all, stdout,
         packages_ppas = yall.review_pgks(PPAS[1])
         PPAS = (ppas, packages_ppas)
     ## Answer "yes" to all questions
-    if install_all:
-        ## Upgrading all packages and python modules with pip
-        yall.upgrade_cmd()
-        yall.upgrade_pip()
-        if len(PACKAGES) > 0:
-            yall.multi_install_cmd(yall.review_pgks(PACKAGES))
-        ## Special packages and ppa's for ubuntu
-        if MyOS == 'ubuntu':
-            yall.multi_install_cmd(yall.review_pgks(defaultUbuntu))
-            ## Installing ppa's and packages
-            if len(ppas) > 0 and len(packages_ppas) > 0:
-                yall.install_and_add_ppa(PPAS)
-    else:
-        upgrade_system(MyOS, stdout, lock_file)
-        if len(PACKAGES) > 0:
-            install_list_package(yall.review_pgks(PACKAGES), lock_file,
-                                                    MyOS, stdout)
-        if MyOS == 'ubuntu':
-            if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
-                install_ppa(PPAS, lock_file)
-    yall.autoremove_cmd()
+    #if install_all:
+        ### Upgrading all packages and python modules with pip
+        #yall.upgrade_cmd()
+        #yall.upgrade_pip()
+        #if len(PACKAGES) > 0:
+            #yall.multi_install_cmd(yall.review_pgks(PACKAGES))
+        ### Special packages and ppa's for ubuntu
+        #if MyOS == 'ubuntu':
+            #yall.multi_install_cmd(yall.review_pgks(defaultUbuntu))
+            ### Installing ppa's and packages
+            #if len(ppas) > 0 and len(packages_ppas) > 0:
+                #yall.install_and_add_ppa(PPAS)
+        ### Removing selected packages
+        #yall.pkgRemove(delpackages)
+    #else:
+        #upgrade_system(MyOS, stdout, lock_file)
+        #if len(PACKAGES) > 0:
+            #install_list_package(yall.review_pgks(PACKAGES), lock_file,
+                                                    #MyOS, stdout)
+        #if MyOS == 'ubuntu':
+            #if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
+                #install_ppa(PPAS, lock_file)
+        ### Removing selected packages
+        #remove_packages(delpackages, MyOS, stdout, lock_file)
+    ### Autoremoving all no need it packages
+    #yall.autoremove_cmd()
+    backup_conf_files(brc, lock_file, MyOS, stdout)
 
 
 def options():
@@ -550,12 +612,15 @@ def options():
 
 
 if __name__ == '__main__':
+
     try:
         dict_options = options()
         configfile = dict_options['config_file']
         value = dict_options['value']
         install_all = dict_options['install_all']
         stdout = dict_options['stdout']
+        initial = True
+        backup = False
         config = config_file(configfile)
         general_config = config.read_config_vars('general')
         MyOS = general_config['MyOS'].lower()
@@ -565,13 +630,16 @@ if __name__ == '__main__':
             if check_root():
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
-                    yall.update_cmd()
-                    yall.multi_install_cmd(yall.review_pgks(
-                                            defaultPackages))
+                    #yall.update_cmd()
+                    #yall.multi_install_cmd(yall.review_pgks(
+                                            #defaultPackages))
                     if not lock_process(lock_file, MyOS):
+                        if initial:
                             install(config, install_all, stdout, lock_file,
                                     MyOS, OSVersion, OSName)
-                            del_file(lock_file)
+                        elif backup:
+                            pass
+                        del_file(lock_file)
     except KeyboardInterrupt:
         del_file(lock_file)
         print('\nExit by the user by pressing "Ctrl + c"...\n')
