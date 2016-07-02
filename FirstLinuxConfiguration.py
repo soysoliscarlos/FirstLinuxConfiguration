@@ -276,11 +276,14 @@ class Linux_Cmd():
         if self._MyOS == 'ubuntu' or self._MyOS == 'debian':
             try:
                 self.command('apt autoremove -y')
+                self.command('apt autoclean -y')
             except:
                 try:
                     self.command('aptitude autoremove -y')
+                    self.command('aptitude autoclean -y')
                 except:
                     self.command('apt-get autoremove -y')
+                    self.command('apt-get autoclean -y')
         print('OK...\n')
 
     def review_pgks(self, _package):
@@ -462,7 +465,7 @@ def install_list_package(_lst_pkg, lock_file, MyOS, stdout):
 
 
 def backup_conf_files(conf_files, lock_file, MyOS, stdout):
-    nameFolder = conf_files['folder']
+    nameFolder = conf_files['backup_folder']
     if not os.path.isdir(nameFolder):
         os.mkdir(nameFolder)
     print(('Your backup folder is: {}'.format(os.path.abspath(nameFolder))))
@@ -519,33 +522,33 @@ def install(config, install_all, stdout,
         packages_ppas = yall.review_pgks(PPAS[1])
         PPAS = (ppas, packages_ppas)
     ## Answer "yes" to all questions
-    #if install_all:
-        ### Upgrading all packages and python modules with pip
-        #yall.upgrade_cmd()
-        #yall.upgrade_pip()
-        #if len(PACKAGES) > 0:
-            #yall.multi_install_cmd(yall.review_pgks(PACKAGES))
-        ### Special packages and ppa's for ubuntu
-        #if MyOS == 'ubuntu':
-            #yall.multi_install_cmd(yall.review_pgks(defaultUbuntu))
-            ### Installing ppa's and packages
-            #if len(ppas) > 0 and len(packages_ppas) > 0:
-                #yall.install_and_add_ppa(PPAS)
-        ### Removing selected packages
-        #yall.pkgRemove(delpackages)
-    #else:
-        #upgrade_system(MyOS, stdout, lock_file)
-        #if len(PACKAGES) > 0:
-            #install_list_package(yall.review_pgks(PACKAGES), lock_file,
-                                                    #MyOS, stdout)
-        #if MyOS == 'ubuntu':
-            #if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
-                #install_ppa(PPAS, lock_file)
-        ### Removing selected packages
-        #remove_packages(delpackages, MyOS, stdout, lock_file)
-    ### Autoremoving all no need it packages
-    #yall.autoremove_cmd()
-    backup_conf_files(brc, lock_file, MyOS, stdout)
+    if install_all:
+        ## Upgrading all packages and python modules with pip
+        yall.upgrade_cmd()
+        yall.upgrade_pip()
+        if len(PACKAGES) > 0:
+            yall.multi_install_cmd(yall.review_pgks(PACKAGES))
+        ## Special packages and ppa's for ubuntu
+        if MyOS == 'ubuntu':
+            yall.multi_install_cmd(yall.review_pgks(defaultUbuntu))
+            ## Installing ppa's and packages
+            if len(ppas) > 0 and len(packages_ppas) > 0:
+                yall.install_and_add_ppa(PPAS)
+        ## Removing selected packages
+        yall.pkgRemove(delpackages)
+    else:
+        upgrade_system(MyOS, stdout, lock_file)
+        if len(PACKAGES) > 0:
+            install_list_package(yall.review_pgks(PACKAGES), lock_file,
+                                                    MyOS, stdout)
+        if MyOS == 'ubuntu':
+            if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
+                install_ppa(PPAS, lock_file)
+        ## Removing selected packages
+        remove_packages(delpackages, MyOS, stdout, lock_file)
+    ## Autoremoving all no need it packages
+    yall.autoremove_cmd()
+    #backup_conf_files(brc, lock_file, MyOS, stdout)
 
 
 def options():
@@ -630,9 +633,9 @@ if __name__ == '__main__':
             if check_root():
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
-                    #yall.update_cmd()
-                    #yall.multi_install_cmd(yall.review_pgks(
-                                            #defaultPackages))
+                    yall.update_cmd()
+                    yall.multi_install_cmd(yall.review_pgks(
+                                            defaultPackages))
                     if not lock_process(lock_file, MyOS):
                         if initial:
                             install(config, install_all, stdout, lock_file,
