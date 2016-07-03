@@ -548,7 +548,7 @@ def install(config, install_all, stdout,
         remove_packages(delpackages, MyOS, stdout, lock_file)
     ## Autoremoving all no need it packages
     yall.autoremove_cmd()
-    #backup_conf_files(brc, lock_file, MyOS, stdout)
+    backup_conf_files(brc, lock_file, MyOS, stdout)
 
 
 def options():
