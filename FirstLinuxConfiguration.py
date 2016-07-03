@@ -7,6 +7,7 @@ import configparser
 import subprocess
 import re
 import apt
+import shutil
 
 lock_file = '/var/run/flc.lock'
 defaultPackages = ('python3-pip', 'python3-dev')
@@ -470,9 +471,13 @@ def backup_conf_files(conf_files, lock_file, MyOS, stdout):
         os.mkdir(nameFolder)
     print(('Your backup folder is: {}'.format(os.path.abspath(nameFolder))))
     for f in conf_files:
-        if not f == 'folder':
+        if not f == 'backup_folder':
             print(('Backing up {}'.format(f)))
-            print(conf_files[f])
+            fileBackup = conf_files[f].split()
+            for i in fileBackup:
+                shutil.copyfile(i, os.nameFolder  '/')
+                print((i))
+                #print(fileBackup)
     pass
 
 
@@ -522,32 +527,32 @@ def install(config, install_all, stdout,
         packages_ppas = yall.review_pgks(PPAS[1])
         PPAS = (ppas, packages_ppas)
     ## Answer "yes" to all questions
-    if install_all:
-        ## Upgrading all packages and python modules with pip
-        yall.upgrade_cmd()
-        yall.upgrade_pip()
-        if len(PACKAGES) > 0:
-            yall.multi_install_cmd(yall.review_pgks(PACKAGES))
-        ## Special packages and ppa's for ubuntu
-        if MyOS == 'ubuntu':
-            yall.multi_install_cmd(yall.review_pgks(defaultUbuntu))
-            ## Installing ppa's and packages
-            if len(ppas) > 0 and len(packages_ppas) > 0:
-                yall.install_and_add_ppa(PPAS)
-        ## Removing selected packages
-        yall.pkgRemove(delpackages)
-    else:
-        upgrade_system(MyOS, stdout, lock_file)
-        if len(PACKAGES) > 0:
-            install_list_package(yall.review_pgks(PACKAGES), lock_file,
-                                                    MyOS, stdout)
-        if MyOS == 'ubuntu':
-            if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
-                install_ppa(PPAS, lock_file)
-        ## Removing selected packages
-        remove_packages(delpackages, MyOS, stdout, lock_file)
-    ## Autoremoving all no need it packages
-    yall.autoremove_cmd()
+    #if install_all:
+        ### Upgrading all packages and python modules with pip
+        #yall.upgrade_cmd()
+        #yall.upgrade_pip()
+        #if len(PACKAGES) > 0:
+            #yall.multi_install_cmd(yall.review_pgks(PACKAGES))
+        ### Special packages and ppa's for ubuntu
+        #if MyOS == 'ubuntu':
+            #yall.multi_install_cmd(yall.review_pgks(defaultUbuntu))
+            ### Installing ppa's and packages
+            #if len(ppas) > 0 and len(packages_ppas) > 0:
+                #yall.install_and_add_ppa(PPAS)
+        ### Removing selected packages
+        #yall.pkgRemove(delpackages)
+    #else:
+        #upgrade_system(MyOS, stdout, lock_file)
+        #if len(PACKAGES) > 0:
+            #install_list_package(yall.review_pgks(PACKAGES), lock_file,
+                                                    #MyOS, stdout)
+        #if MyOS == 'ubuntu':
+            #if len(PPAS[0]) > 0 and len(PPAS[1]) > 0:
+                #install_ppa(PPAS, lock_file)
+        ### Removing selected packages
+        #remove_packages(delpackages, MyOS, stdout, lock_file)
+    ### Autoremoving all no need it packages
+    #yall.autoremove_cmd()
     backup_conf_files(brc, lock_file, MyOS, stdout)
 
 
@@ -633,9 +638,9 @@ if __name__ == '__main__':
             if check_root():
                 if is_connected():
                     yall = Linux_Cmd(MyOS, stdout)
-                    yall.update_cmd()
-                    yall.multi_install_cmd(yall.review_pgks(
-                                            defaultPackages))
+                    #yall.update_cmd()
+                    #yall.multi_install_cmd(yall.review_pgks(
+                                            #defaultPackages))
                     if not lock_process(lock_file, MyOS):
                         if initial:
                             install(config, install_all, stdout, lock_file,
